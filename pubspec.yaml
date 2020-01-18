@@ -27,6 +27,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  sqflite: any
+  path_provider: any
+  intl: ^0.16.1
 
 
 # For information on the generic Dart part of this file, see the
@@ -40,6 +43,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  assets:
+    - images/transportation.png
+    - images/cash.png
   # To add assets to your application, add an assets section, like this:
   # assets:
   #  - images/a_dot_burr.jpeg
@@ -70,3 +76,16 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+  fonts:
+     - family: Raleway
+       fonts:
+         - asset: fonts/Raleway-Regular.ttf
+         - asset: fonts/Raleway-Bold.ttf
+           weight: 700
+         - asset: fonts/Raleway-LightItalic.ttf
+           weight: 300
+           style: italic
+     - family: Roboto
+       fonts:
+         - asset: fonts/Roboto-Regular.ttf

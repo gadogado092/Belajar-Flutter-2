@@ -1,29 +1,413 @@
 import 'package:flutter/material.dart';
 import 'app_screens/first_screen.dart';
-void main() =>
-  runApp(
-    MyApp2()
-  );
+import 'app_screens/home.dart';
+import 'app_screens/note_list.dart';
+import 'app_screens/detail_list.dart';
+
+void main() {
+  runApp(MyApp());
+}
 
 
-class MyApp2 extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "APP ASSISTENT",
-      home: Scaffold(
-        appBar: AppBar(title:  Text("HOME SIRI"),),
-        body: FirstScreen()
-      )
+      title: 'Note',
+      debugShowCheckedModeBanner:false,
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+      ),
+      home: NoteList(),
+
     );
+
   }
 
 }
 
 
 
-class MyApp extends StatelessWidget {
+
+
+
+
+
+
+
+
+
+
+
+//calculator
+
+void main3() {
+  runApp(MaterialApp(
+    title: "Stateful Example",
+    home: SIForm(),
+    theme: ThemeData(
+      primaryColor: Colors.indigo,
+      accentColor: Colors.indigoAccent,
+      brightness: Brightness.dark,
+    ),
+  ));
+}
+
+
+
+
+
+
+class SIForm extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return _SIFormState();
+  }
+}
+
+class _SIFormState extends State<SIForm> {
+//  var _currenCities = ['Rp','Dollar','Pounds', 'Others'];
+  var _formKey = GlobalKey<FormState>();
+
+  var _currencies = ['Rp', 'Dollar', 'Pounds', 'Others'];
+  var _currentItemSelected = '';
+  final _minimumPadding = 5.0;
+  var displayResult = '';
+
+  TextEditingController principalController = TextEditingController();
+  TextEditingController roiController = TextEditingController();
+  TextEditingController termController = TextEditingController();
+
+  void initState() {
+    super.initState();
+    _currentItemSelected = _currencies[0];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    TextStyle textStyle = Theme.of(context).textTheme.title;
+
+    return Scaffold(
+//      resizeToAvoidBottomPadding: false,
+      appBar: AppBar(
+        title: Text("Calculator"),
+      ),
+
+      body: Form(
+          key: _formKey,
+          child: Padding(
+            padding: EdgeInsets.all(_minimumPadding * 2),
+            child: ListView(
+              children: <Widget>[
+                getImageAsset(),
+                Padding(
+                    padding: EdgeInsets.only(
+                        top: _minimumPadding, bottom: _minimumPadding),
+                    child: TextFormField(
+                      style: textStyle,
+                      keyboardType: TextInputType.number,
+                      controller: principalController,
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter value';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                          labelText: "Principal",
+                          hintText: 'Masukkan Prinsipal',
+                          labelStyle: textStyle,
+                          errorStyle: TextStyle(
+                            color: Colors.yellowAccent,
+                            fontSize: 15.0
+                          ),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0))),
+                    )),
+                Padding(
+                    padding: EdgeInsets.only(
+                        top: _minimumPadding, bottom: _minimumPadding),
+                    child: TextField(
+                      style: textStyle,
+                      keyboardType: TextInputType.number,
+                      controller: roiController,
+                      decoration: InputDecoration(
+                          labelText: "Rate of Interest",
+                          hintText: 'Dalam Persen',
+                          labelStyle: textStyle,
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0))),
+                    )),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                        child: TextField(
+                      keyboardType: TextInputType.number,
+                      style: textStyle,
+                      controller: termController,
+                      decoration: InputDecoration(
+                          labelText: "Term",
+                          hintText: 'Dalam Persen',
+                          labelStyle: textStyle,
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0))),
+                    )),
+                    Expanded(
+                        child: DropdownButton<String>(
+                      items: _currencies.map((String dropDownStringItem) {
+                        return DropdownMenuItem<String>(
+                          value: dropDownStringItem,
+                          child: Text(dropDownStringItem),
+                        );
+                      }).toList(),
+                      onChanged: (String newValueSelected) {
+                        _onDropdownSelected(newValueSelected);
+                      },
+                      value: _currentItemSelected,
+                    )),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: RaisedButton(
+                        color: Theme.of(context).accentColor,
+                        textColor: Theme.of(context).primaryColorDark,
+                        child: Text('Hitung'),
+                        onPressed: () {
+                          setState(() {
+                            if(_formKey.currentState.validate()){
+                              displayResult = _calculateTotal();
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: RaisedButton(
+                        color: Theme.of(context).primaryColorDark,
+                        textColor: Theme.of(context).primaryColorLight,
+                        child: Text('Clear'),
+                        onPressed: () {
+                          setState(() {
+                            _reset();
+                          });
+                        },
+                      ),
+                    )
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.all(_minimumPadding * 2),
+                  child: Text(
+                    displayResult,
+                    style: textStyle,
+                  ),
+                ),
+              ],
+            ),
+          )),
+    );
+  }
+
+  Widget getImageAsset() {
+    AssetImage assetImage = AssetImage('images/cash.png');
+    Image image = Image(
+      image: assetImage,
+      width: 125.0,
+      height: 125.0,
+    );
+
+    return Container(
+      child: image,
+    );
+  }
+
+  void _onDropdownSelected(String newValueSelected) {
+    setState(() {
+      this._currentItemSelected = newValueSelected;
+    });
+  }
+
+  String _calculateTotal() {
+    double principal = double.parse(principalController.text);
+    double roi = double.parse(roiController.text);
+    double term = double.parse(termController.text);
+
+    double total = principal + (principal * roi * term) / 100;
+
+    String result =
+        "After $term  years, your investment will be worth $total $_currentItemSelected";
+
+    return result;
+  }
+
+  void _reset() {
+    principalController.text = '';
+    roiController.text = '';
+    termController.text = '';
+    displayResult = '';
+    _currentItemSelected = _currencies[0];
+  }
+}
+
+class FavoriteCity extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return _FavoriteCityState();
+  }
+}
+
+class _FavoriteCityState extends State<FavoriteCity> {
+  String nameCity = "";
+  var _currencies = ['Rp', 'Dollar', 'Pounds', 'Others'];
+  var _currentItemSelected = 'Rp';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Stateful"),
+      ),
+      body: Container(
+        child: Column(
+          children: <Widget>[
+            TextField(
+              onSubmitted: (String userInput) {
+                setState(() {
+                  nameCity = userInput;
+                });
+              },
+            ),
+            DropdownButton<String>(
+              items: _currencies.map((String dropDownStringItem) {
+                return DropdownMenuItem<String>(
+                  value: dropDownStringItem,
+                  child: Text(dropDownStringItem),
+                );
+              }).toList(),
+              onChanged: (String newValueSelected) {
+                _onDropdownSelected(newValueSelected);
+              },
+              value: _currentItemSelected,
+            ),
+            Text(
+              "Name = $nameCity",
+              style: TextStyle(fontSize: 20.0),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onDropdownSelected(String newValueSelected) {
+    setState(() {
+      this._currentItemSelected = newValueSelected;
+    });
+  }
+}
+
+void main2() {
+  runApp(MaterialApp(
+//    debugShowCheckedModeBanner: false,
+    title: "Explore",
+    home: Scaffold(
+      appBar: AppBar(
+        title: Text("Long List"),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: null,
+        child: Icon(Icons.add),
+        tooltip: "Tambah Item", //long click view
+      ),
+      body: getListW(),
+    ),
+  ));
+}
+
+void showSnackBar(BuildContext context, String listItem) {
+  var snackBar = SnackBar(
+    content: Text("You Just Tap $listItem"),
+    action: SnackBarAction(
+        label: "Back",
+        onPressed: () {
+          debugPrint("Back To Laptop");
+        }),
+  );
+
+  Scaffold.of(context).showSnackBar(snackBar);
+}
+
+List<String> getList() {
+  var items = List<String>.generate(1000, (counter) => "Item $counter");
+  return items;
+}
+
+Widget getListW() {
+  var listItems = getList();
+
+  var listView = ListView.builder(itemBuilder: (context, index) {
+    return ListTile(
+        title: Text(listItems[index]),
+        onTap: () {
+          showSnackBar(context, listItems[index]);
+        });
+  });
+  return listView;
+}
+
+//basic/simple list
+Widget getListView() {
+  var listView = ListView(
+    children: <Widget>[
+      ListTile(
+        leading: Icon(Icons.ac_unit),
+        title: Text("Perbaikan AC"),
+        subtitle: Icon(Icons.image),
+        onTap: () {
+          debugPrint("ACb");
+        },
+      ),
+      ListTile(
+        leading: Icon(Icons.ac_unit),
+        title: Text("Perbaikan AC2"),
+      ),
+      ListTile(
+        title: Text("Perbaikan AC3"),
+        subtitle: Icon(Icons.image),
+      ),
+      Text("Yet"),
+      Container(
+        color: Colors.red,
+        height: 25.0,
+      )
+    ],
+  );
+
+  return listView;
+}
+//void main() =>
+//  runApp(
+//    MyApp2()
+//  );
+
+class MyApp2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: "APP ASSISTENT",
+        home: Scaffold(
+            appBar: AppBar(
+              title: Text("HOME SIRI"),
+            ),
+            body: FirstScreen()));
+  }
+}
+
+class MyApp3 extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
