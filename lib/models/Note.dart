@@ -1,7 +1,3 @@
-
-
-import 'dart:html';
-
 class Note{
 
   int _id;
@@ -48,13 +44,14 @@ class Note{
 
   //convert object to map
   Map<String, dynamic> toMap(){
+    //harus sama dengan nama coloumn tabel pada database
     var map = Map<String, dynamic>();
     if(id != null){
       map['id'] = _id;
     }
 
     map['title'] = _title;
-    map['desc'] = _desc;
+    map['description'] = _desc;
     map['priority'] = _priority;
     map['date'] = _date;
 
@@ -64,11 +61,12 @@ class Note{
   //map to object
 
   Note.fromMapObject(Map<String, dynamic> map){
+    //HARUS SAMA DGN NAMA KOLOM
     this._id = map['id'];
-    this._id = map['title'];
-    this._id = map['desc'];
-    this._id = map['priority'];
-    this._id = map['date'];
+    this._title = map['title'];
+    this._desc = map['description'];
+    this._priority = map['priority'];
+    this._date = map['date'];
   }
 
 }

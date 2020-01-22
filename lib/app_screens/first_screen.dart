@@ -1,8 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class FirstScreen extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -22,7 +25,18 @@ class FirstScreen extends StatelessWidget {
   String generateRandomNumber(){
     var random = Random();
     int randomNumber = random.nextInt(10);
+
+//    var response= fetchPost();
+//    response.then((data){
+//      debugPrint("==="+data.)
+//    });
+    getData();
     return "Hi SIRI $randomNumber";
+  }
+
+  Future getData() async {
+    http.Response response = await http.get('https://jsonplaceholder.typicode.com/posts/1');
+    debugPrint("==="+response.body);
   }
 
 }

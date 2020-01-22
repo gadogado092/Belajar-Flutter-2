@@ -1,13 +1,17 @@
+import 'package:belajar_flutter/utils/database_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:belajar_flutter/models/Note.dart';
+import 'package:intl/intl.dart';
 
 class NoteDetail extends StatefulWidget {
-  String appBarTitle;
+  final String appBarTitle;
+  final Note note;
 
-  NoteDetail(this.appBarTitle);
+  NoteDetail(this.note, this.appBarTitle);
 
   @override
   State<StatefulWidget> createState() {
-    return NoteDetailState(this.appBarTitle);
+    return NoteDetailState(this.note, this.appBarTitle);
   }
 }
 
@@ -17,12 +21,17 @@ class NoteDetailState extends State<NoteDetail> {
   TextEditingController descController = TextEditingController();
 
   String appBarTitle;
+  Note note;
+  DatabaseHelper databaseHelper = DatabaseHelper();
 
-  NoteDetailState(this.appBarTitle);
+  NoteDetailState(this.note, this.appBarTitle);
 
   @override
   Widget build(BuildContext context) {
     TextStyle textStyle = Theme.of(context).textTheme.title;
+
+    titleController.text = note.title;
+    descController.text = note.desc;
 
     return WillPopScope(
         onWillPop: () {
@@ -49,10 +58,13 @@ class NoteDetailState extends State<NoteDetail> {
                             child: Text(dropDownStringItem));
                       }).toList(),
                       style: textStyle,
-                      value: 'Low',
+                      
+                      value: getPriorityAsString(note.priority),
+                      
                       onChanged: (valueSelectedByUser) {
                         setState(() {
-                          debugPrint('select $valueSelectedByUser');
+                          updatePriorityAsInt(valueSelectedByUser);
+//                          debugPrint('select $valueSelectedByUser');
                         });
                       }),
                 ),
@@ -62,7 +74,8 @@ class NoteDetailState extends State<NoteDetail> {
                     controller: titleController,
                     style: textStyle,
                     onChanged: (value) {
-                      debugPrint('change $value');
+//                      debugPrint('change $value');
+                      updateTitle();
                     },
                     decoration: InputDecoration(
                         labelText: 'Judul',
@@ -74,10 +87,11 @@ class NoteDetailState extends State<NoteDetail> {
                 Padding(
                   padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
                   child: TextField(
-                    controller: titleController,
+                    controller: descController,
                     style: textStyle,
                     onChanged: (value) {
-                      debugPrint('change $value');
+                      updateDesc();
+//                      debugPrint('change $value');
                     },
                     decoration: InputDecoration(
                         labelText: 'Descripsi',
@@ -100,7 +114,8 @@ class NoteDetailState extends State<NoteDetail> {
                         ),
                         onPressed: () {
                           setState(() {
-                            debugPrint('Save');
+//                            debugPrint('Save');
+                            _save();
                           });
                         },
                       )),
@@ -117,6 +132,7 @@ class NoteDetailState extends State<NoteDetail> {
                         ),
                         onPressed: () {
                           setState(() {
+                            _delete();
                             debugPrint('Delete');
                           });
                         },
@@ -131,6 +147,88 @@ class NoteDetailState extends State<NoteDetail> {
   }
 
   void moveToLastScreen() {
-    Navigator.pop(context);
+    Navigator.pop(context, true);// nilai kembalian ke screen sebelumnya true
   }
+
+  void updatePriorityAsInt(String value){
+    switch (value){
+      case 'Height':
+        note.priority =1;
+        break;
+      case 'Low':
+        note.priority =2;
+        break;
+    }
+  }
+
+  String getPriorityAsString(int value){
+    String priority;
+    switch (value){
+      case 1:
+        priority = _priorities[0];
+        break;
+      case 2:
+        priority = _priorities[1];
+        break;
+    }
+    return priority;
+  }
+
+  void updateTitle(){
+    note.title = titleController.text;
+  }
+
+  void updateDesc(){
+    note.desc = descController.text;
+  }
+
+  void _save() async{
+
+    moveToLastScreen();
+    note.date = DateFormat.yMMMd().format(DateTime.now());
+
+    int result;
+    if(note.id != null){
+      result = await databaseHelper.updateNote(note);
+    }else{
+      result = await databaseHelper.insertNote(note);
+    }
+
+    if(result!=0) {
+      _showAlertDialog('Status', 'Note Saved');
+    }else{
+      _showAlertDialog('Status', 'Problem Save Note');
+    }
+
+  }
+
+  void _delete() async{
+    moveToLastScreen();
+
+    if(note.id==null){
+      _showAlertDialog('status', 'No Note to Delete');
+      return;
+    }
+
+    int result = await databaseHelper.deleteNote(note.id);
+    if(result !=0){
+      _showAlertDialog('status', 'Note Deleted Sukses');
+    }else{
+      _showAlertDialog('status', 'Error Delete Note');
+    }
+
+  }
+
+  void _showAlertDialog(String title, String message) {
+    AlertDialog alertDialog = AlertDialog(
+      title: Text(title),
+      content: Text(message),
+    );
+    showDialog(context: context,
+    builder: (_) => alertDialog
+    );
+  }
+
+
+
 }
